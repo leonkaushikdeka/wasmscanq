@@ -26,11 +26,14 @@ mod reference;
 mod vcf;
 
 pub use bam::{BamReader, BamRecord, CigarOp, CigarOperation, ReadFlags, ReferenceInfo};
-pub use coverage::{Coverage, CoverageCalculator};
+pub use coverage::{
+    calculate_coverage_downsampled, calculate_coverage_simple, Coverage, CoverageCalculator,
+};
 pub use errors::{CoreError, CoreResult};
 pub use indexed_bam::{BaiIndex, IndexedBamReader, RegionIterator, RegionStats};
 pub use pileup::{
-    find_variants, Pileup, PileupColumn, PileupConfig, PileupGenerator, VariantCandidate,
+    find_variants, generate_pileup, Pileup, PileupColumn, PileupConfig, PileupGenerator,
+    VariantCandidate,
 };
 pub use reference::{GenomeAssembly, GenomicRegion, ReferenceCollection, ReferenceSequence};
 pub use vcf::{VariantType, VcfHeader, VcfReader, VcfRecord, VcfStats};
