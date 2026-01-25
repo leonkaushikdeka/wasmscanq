@@ -1,0 +1,14 @@
+[workspace]
+members = [
+    "crates/chromatiq-core",
+    "crates/chromatiq-wasm",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Chromatiq Team <dev@chromatiq.io>"]
+description = "Zero-infrastructure WASM-powered genomic visualization engine"
+repository = "https://github.com/chromatiq/chromatiq"
+license = "MIT OR Apache-2.0"

@@ -1,0 +1,13 @@
+{
+  "name": "chromatiq-web",
+  "version": "0.1.0",
+  "description": "Chromatiq Web Interface",
+  "type": "module",
+  "scripts": {
+    "serve": "npx serve .",
+    "dev": "npx serve . -l 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

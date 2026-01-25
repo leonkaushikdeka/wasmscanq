@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chromatiq - Genomic Visualization Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px 40px;
+            border-bottom: 1px solid #2a2a4a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .version {
+            font-size: 12px;
+            color: #888;
+            margin-left: 8px;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 81px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #0f0f18;
+            border-right: 1px solid #2a2a4a;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        .file-drop-zone {
+            border: 2px dashed #3a3a5a;
+            border-radius: 8px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-drop-zone:hover,
+        .file-drop-zone.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .file-drop-zone input {
+            display: none;
+        }
+
+        .file-drop-text {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .file-drop-hint {
+            color: #666;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .loaded-files {
+            margin-top: 16px;
+        }
+
+        .loaded-file {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .loaded-file-info {
+            flex: 1;
+        }
+
+        .loaded-file-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .loaded-file-meta {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 18px;
+        }
+
+        .navigation-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .nav-row label {
+            font-size: 12px;
+            color: #888;
+            width: 60px;
+        }
+
+        .nav-row input {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .nav-row input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #2a2a4a;
+        }
+
+        .viewer-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0a0a0f;
+        }
+
+        .viewer-toolbar {
+            background: #0f0f18;
+            border-bottom: 1px solid #2a2a4a;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: #2a2a4a;
+            border: none;
+            color: #e0e0e0;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-btn:hover {
+            background: #3a3a5a;
+        }
+
+        .position-display {
+            font-size: 13px;
+            color: #888;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #coverage-canvas {
+            width: 100%;
+            height: 150px;
+            background: #0a0a0f;
+        }
+
+        #read-canvas {
+            flex: 1;
+            width: 100%;
+            background: #0a0a0f;
+            cursor: grab;
+        }
+
+        #read-canvas:active {
+            cursor: grabbing;
+        }
+
+        .stats-panel {
+            background: #0f0f18;
+            border-top: 1px solid #2a2a4a;
+            padding: 16px 20px;
+            display: flex;
+            gap: 32px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .status-bar {
+            background: #0a0a0f;
+            border-top: 1px solid #2a2a4a;
+            padding: 8px 20px;
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .status-dot.loading {
+            background: #fbbf24;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 15, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #2a2a4a;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 16px;
+            color: #888;
+        }
+
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 11px;
+            color: #4ade80;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">C</div>
+            <span class="logo-text">Chromatiq</span>
+            <span class="version" id="version-display"></span>
+        </div>
+        <div class="privacy-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            100% Client-Side Processing
+        </div>
+    </header>
+
+    <main class="main-container">
+        <aside class="sidebar">
+            <section class="sidebar-section">
+                <div class="sidebar-title">Data Files</div>
+                <div class="file-drop-zone" id="drop-zone">
+                    <input type="file" id="file-input" accept=".bam,.cram">
+                    <div class="file-drop-text">Drop BAM/CRAM files here</div>
+                    <div class="file-drop-hint">or click to browse</div>
+                </div>
+                <div class="loaded-files" id="loaded-files"></div>
+            </section>
+
+            <section class="sidebar-section">
+                <div class="sidebar-title">Navigation</div>
+                <div class="navigation-controls">
+                    <div class="nav-row">
+                        <label>Reference</label>
+                        <input type="text" id="ref-input" value="chr1" placeholder="chr1">
+                    </div>
+                    <div class="nav-row">
+                        <label>Start</label>
+                        <input type="number" id="start-input" value="0">
+                    </div>
+                    <div class="nav-row">
+                        <label>End</label>
+                        <input type="number" id="end-input" value="1000000">
+                    </div>
+                    <button class="btn" id="go-btn" style="width: 100%;">Go to Region</button>
+                </div>
+            </section>
+
+            <section class="sidebar-section">
+                <div class="sidebar-title">Actions</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn btn-secondary" id="share-btn">Copy Share Link</button>
+                    <button class="btn btn-secondary" id="export-btn">Export View (PNG)</button>
+                </div>
+            </section>
+        </aside>
+
+        <div class="viewer-area">
+            <div class="viewer-toolbar">
+                <div class="zoom-controls">
+                    <button class="zoom-btn" id="zoom-out">−</button>
+                    <span class="position-display" id="zoom-level">100%</span>
+                    <button class="zoom-btn" id="zoom-in">+</button>
+                </div>
+                <div class="position-display" id="region-display">chr1:0-1,000,000</div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="coverage-canvas"></canvas>
+                <canvas id="read-canvas"></canvas>
+                <div class="loading-overlay hidden" id="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text" id="loading-text">Processing genomic data...</div>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-reads">0</div>
+                    <div class="stat-label">Reads</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-depth">0x</div>
+                    <div class="stat-label">Avg Depth</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-max-depth">0x</div>
+                    <div class="stat-label">Max Depth</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-variants">0</div>
+                    <div class="stat-label">Variants</div>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div class="status-indicator">
+                    <div class="status-dot" id="status-dot"></div>
+                    <span id="status-text">Ready</span>
+                </div>
+                <div>
+                    <span id="memory-usage">Memory: 0 MB</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import init, { ChromatiqEngine, getVersion, getInfo } from './pkg/chromatiq_wasm.js';
+
+        let engine = null;
+        let currentRegion = { ref: 'chr1', start: 0, end: 1000000 };
+        let zoom = 1.0;
+        let coverageData = null;
+        let pileupData = null;
+        let isLoading = false;
+
+        const readCanvas = document.getElementById('read-canvas');
+        const readCtx = readCanvas.getContext('2d');
+        const coverageCanvas = document.getElementById('coverage-canvas');
+        const coverageCtx = coverageCanvas.getContext('2d');
+
+        async function initialize() {
+            try {
+                await init();
+                engine = new ChromatiqEngine();
+
+                document.getElementById('version-display').textContent = `v${getVersion()}`;
+
+                setupEventListeners();
+                resizeCanvases();
+                renderPlaceholder();
+
+                updateStatus('Ready', 'ready');
+                console.log(getInfo());
+            } catch (error) {
+                console.error('Failed to initialize Chromatiq:', error);
+                updateStatus('Initialization failed', 'error');
+            }
+        }
+
+        function setupEventListeners() {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            dropZone.addEventListener('drop', handleFileDrop);
+            fileInput.addEventListener('change', handleFileSelect);
+
+            document.getElementById('go-btn').addEventListener('click', navigateToRegion);
+            document.getElementById('zoom-in').addEventListener('click', () => adjustZoom(1.5));
+            document.getElementById('zoom-out').addEventListener('click', () => adjustZoom(0.67));
+            document.getElementById('share-btn').addEventListener('click', shareView);
+            document.getElementById('export-btn').addEventListener('click', exportView);
+
+            window.addEventListener('resize', () => {
+                resizeCanvases();
+                if (coverageData) renderCoverage();
+                if (pileupData) renderReads();
+            });
+        }
+
+        async function handleFileDrop(e) {
+            e.preventDefault();
+            document.getElementById('drop-zone').classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                await loadFile(files[0]);
+            }
+        }
+
+        async function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                await loadFile(files[0]);
+            }
+        }
+
+        async function loadFile(file) {
+            setLoading(true, `Loading ${file.name}...`);
+
+            try {
+                const buffer = await file.arrayBuffer();
+                const data = new Uint8Array(buffer);
+                const index = engine.load_bam(data);
+
+                updateLoadedFilesList();
+                updateStatus(`Loaded ${file.name}`, 'ready');
+
+                if (!coverageData) {
+                    await loadRegionData();
+                }
+            } catch (error) {
+                console.error('Failed to load file:', error);
+                updateStatus(`Failed to load ${file.name}`, 'error');
+            }
+
+            setLoading(false);
+        }
+
+        function updateLoadedFilesList() {
+            const container = document.getElementById('loaded-files');
+            const fileCount = engine.get_file_count();
+
+            if (fileCount === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = Array.from({ length: fileCount }, (_, i) => `
+                <div class="loaded-file">
+                    <div class="loaded-file-info">
+                        <div class="loaded-file-name">File ${i + 1}</div>
+                        <div class="loaded-file-meta">Loaded</div>
+                    </div>
+                    <button class="remove-file" onclick="removeFile(${i})">×</button>
+                </div>
+            `).join('');
+        }
+
+        async function loadRegionData() {
+            if (engine.get_file_count() === 0) return;
+
+            setLoading(true, 'Calculating coverage...');
+
+            try {
+                coverageData = engine.calculate_combined_coverage(
+                    currentRegion.ref,
+                    currentRegion.start,
+                    currentRegion.end
+                );
+
+                updateStats();
+                renderCoverage();
+
+                setLoading(false);
+            } catch (error) {
+                console.error('Failed to load region data:', error);
+                setLoading(false);
+            }
+        }
+
+        async function navigateToRegion() {
+            const ref = document.getElementById('ref-input').value;
+            const start = parseInt(document.getElementById('start-input').value);
+            const end = parseInt(document.getElementById('end-input').value);
+
+            if (start >= end) {
+                alert('End position must be greater than start');
+                return;
+            }
+
+            currentRegion = { ref, start, end };
+            document.getElementById('region-display').textContent =
+                `${ref}:${start.toLocaleString()}-${end.toLocaleString()}`;
+
+            await loadRegionData();
+        }
+
+        function adjustZoom(factor) {
+            zoom = Math.max(0.1, Math.min(10, zoom * factor));
+            document.getElementById('zoom-level').textContent = `${Math.round(zoom * 100)}%`;
+
+            if (coverageData) renderCoverage();
+            if (pileupData) renderReads();
+        }
+
+        function resizeCanvases() {
+            const container = coverageCanvas.parentElement;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            coverageCanvas.width = width * window.devicePixelRatio;
+            coverageCanvas.height = 150 * window.devicePixelRatio;
+            coverageCanvas.style.width = `${width}px`;
+            coverageCanvas.style.height = '150px';
+            coverageCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            readCanvas.width = width * window.devicePixelRatio;
+            readCanvas.height = (height - 150) * window.devicePixelRatio;
+            readCanvas.style.width = `${width}px`;
+            readCanvas.style.height = `${height - 150}px`;
+            readCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        function renderPlaceholder() {
+            readCtx.fillStyle = '#0a0a0f';
+            readCtx.fillRect(0, 0, readCanvas.width, readCanvas.height);
+
+            readCtx.fillStyle = '#2a2a4a';
+            readCtx.font = '14px -apple-system, sans-serif';
+            readCtx.textAlign = 'center';
+            readCtx.fillText(
+                'Load a BAM file to begin visualization',
+                readCanvas.width / (2 * window.devicePixelRatio),
+                readCanvas.height / (2 * window.devicePixelRatio)
+            );
+        }
+
+        function renderCoverage() {
+            if (!coverageData) return;
+
+            const width = coverageCanvas.clientWidth;
+            const height = 150;
+
+            coverageCtx.fillStyle = '#0a0a0f';
+            coverageCtx.fillRect(0, 0, width, height);
+
+            const values = coverageData.values;
+            if (values.length === 0) return;
+
+            const maxDepth = Math.max(...values, 1);
+            const barWidth = width / values.length;
+
+            for (let i = 0; i < values.length; i++) {
+                const barHeight = (values[i] / maxDepth) * (height - 20);
+                const x = i * barWidth;
+                const y = height - barHeight - 10;
+
+                const gradient = coverageCtx.createLinearGradient(x, y, x, height - 10);
+                gradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)');
+                gradient.addColorStop(1, 'rgba(118, 75, 162, 0.4)');
+
+                coverageCtx.fillStyle = gradient;
+                coverageCtx.fillRect(x, y, Math.max(barWidth, 1), barHeight);
+            }
+
+            coverageCtx.strokeStyle = '#3a3a5a';
+            coverageCtx.beginPath();
+            coverageCtx.moveTo(0, height - 10);
+            coverageCtx.lineTo(width, height - 10);
+            coverageCtx.stroke();
+        }
+
+        function renderReads() {
+            if (!pileupData) return;
+
+            const width = readCanvas.clientWidth;
+            const height = readCanvas.clientHeight;
+
+            readCtx.fillStyle = '#0a0a0f';
+            readCtx.fillRect(0, 0, width, height);
+
+            const regionWidth = currentRegion.end - currentRegion.start;
+            const pixelsPerBase = (width / regionWidth) * zoom;
+
+            if (pileupData.columns) {
+                for (const column of pileupData.columns) {
+                    const x = ((column.position - currentRegion.start) / regionWidth) * width;
+
+                    if (column.consensus_base) {
+                        readCtx.fillStyle = '#667eea';
+                        readCtx.fillRect(x, 10, Math.max(1, pixelsPerBase), 20);
+                    }
+
+                    for (const read of column.reads.slice(0, 50)) {
+                        const y = 40 + read.offset * 12;
+
+                        if (read.is_deletion) {
+                            readCtx.fillStyle = '#ff6b6b';
+                            readCtx.fillRect(x, y, Math.max(1, pixelsPerBase), 10);
+                        } else {
+                            readCtx.fillStyle = getBaseColor(read.base);
+                            readCtx.fillRect(x, y, Math.max(1, pixelsPerBase), 10);
+                        }
+                    }
+                }
+            }
+        }
+
+        function getBaseColor(base) {
+            const colors = {
+                'A': '#4ade80',
+                'T': '#f87171',
+                'G': '#fbbf24',
+                'C': '#60a5fa',
+                'N': '#6b7280'
+            };
+            return colors[String.fromCharCode(base)] || '#6b7280';
+        }
+
+        function updateStats() {
+            if (!coverageData) return;
+
+            const totalDepth = coverageData.values.reduce((a, b) => a + b, 0);
+            const avgDepth = coverageData.values.length > 0
+                ? totalDepth / coverageData.values.length
+                : 0;
+            const maxDepth = Math.max(...coverageData.values, 1);
+
+            document.getElementById('stat-reads').textContent = '~' + (totalDepth / 100).toFixed(0);
+            document.getElementById('stat-depth').textContent = `${avgDepth.toFixed(1)}x`;
+            document.getElementById('stat-max-depth').textContent = `${maxDepth}x`;
+        }
+
+        function setLoading(loading, text = 'Processing...') {
+            isLoading = loading;
+            const overlay = document.getElementById('loading');
+            const statusDot = document.getElementById('status-dot');
+
+            if (loading) {
+                overlay.classList.remove('hidden');
+                document.getElementById('loading-text').textContent = text;
+                statusDot.classList.add('loading');
+                updateStatus(text, 'loading');
+            } else {
+                overlay.classList.add('hidden');
+                statusDot.classList.remove('loading');
+                updateStatus('Ready', 'ready');
+            }
+        }
+
+        function updateStatus(text, status) {
+            document.getElementById('status-text').textContent = text;
+        }
+
+        function shareView() {
+            const state = {
+                ref: currentRegion.ref,
+                start: currentRegion.start,
+                end: currentRegion.end,
+                zoom: zoom
+            };
+            const shareData = btoa(JSON.stringify(state));
+            const url = `${window.location.origin}${window.location.pathname}?s=${shareData}`;
+
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Share link copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this link:', url);
+            });
+        }
+
+        function exportView() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = readCanvas.width;
+            canvas.height = readCanvas.height + coverageCanvas.height + 50;
+
+            ctx.fillStyle = '#0a0a0f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.drawImage(coverageCanvas, 0, 0);
+            ctx.drawImage(readCanvas, 0, 150);
+
+            ctx.fillStyle = '#e0e0e0';
+            ctx.font = '16px sans-serif';
+            ctx.fillText(
+                `Chromatiq: ${currentRegion.ref}:${currentRegion.start}-${currentRegion.end}`,
+                20,
+                canvas.height - 20
+            );
+
+            const link = document.createElement('a');
+            link.download = `chromatiq_${currentRegion.ref}_${currentRegion.start}-${currentRegion.end}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        window.removeFile = function(index) {
+            engine.unload_bam(index);
+            updateLoadedFilesList();
+        };
+
+        initialize();
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+[package]
+name = "chromatiq-core"
+version.workspace = true
+edition.workspace = true
+description = "Core genomic data processing library for Chromatiq"
+documentation = "https://github.com/chromatiq/chromatiq#readme"
+
+[dependencies]
+nom = { version = "7.1", features = ["alloc", "std"] }
+rayon = "1.10"
+thiserror = "2.0"
+memmap2 = "0.9"
+flate2 = "1.0"
+indexmap = "2.2"
+parking_lot = "0.12"
+
+[features]
+default = ["std"]
+std = []
+
+[dev-dependencies]
+tempfile = "3"
+proptest = "1.4"
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"
