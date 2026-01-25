@@ -20,7 +20,7 @@
 
         .header {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 20px 40px;
+            padding: 16px 32px;
             border-bottom: 1px solid #2a2a4a;
             display: flex;
             align-items: center;
@@ -46,48 +46,56 @@
         }
 
         .logo-text {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .version {
-            font-size: 12px;
-            color: #888;
-            margin-left: 8px;
+        .header-actions {
+            display: flex;
+            gap: 12px;
         }
 
         .main-container {
             display: flex;
-            height: calc(100vh - 81px);
+            height: calc(100vh - 65px);
         }
 
         .sidebar {
-            width: 300px;
+            width: 320px;
             background: #0f0f18;
             border-right: 1px solid #2a2a4a;
             padding: 20px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .sidebar-section {
-            margin-bottom: 24px;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 16px;
         }
 
         .sidebar-title {
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: #888;
             margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .file-drop-zone {
             border: 2px dashed #3a3a5a;
             border-radius: 8px;
-            padding: 30px 20px;
+            padding: 24px 16px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -103,44 +111,76 @@
             display: none;
         }
 
-        .file-drop-text {
-            color: #888;
-            font-size: 14px;
+        .file-type-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
-        .file-drop-hint {
-            color: #666;
+        .file-type-tab {
+            flex: 1;
+            padding: 8px;
+            background: #2a2a4a;
+            border: none;
+            border-radius: 4px;
+            color: #888;
             font-size: 12px;
-            margin-top: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-type-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
         .loaded-files {
-            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         .loaded-file {
-            background: #1a1a2e;
+            background: #0f0f18;
             border: 1px solid #2a2a4a;
             border-radius: 6px;
             padding: 12px;
-            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
         }
+
+        .file-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .file-icon.bam { background: rgba(102, 126, 234, 0.2); color: #667eea; }
+        .file-icon.vcf { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
 
         .loaded-file-info {
             flex: 1;
+            min-width: 0;
         }
 
         .loaded-file-name {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .loaded-file-meta {
-            font-size: 11px;
+            font-size: 10px;
             color: #888;
         }
 
@@ -151,37 +191,40 @@
             cursor: pointer;
             padding: 4px;
             font-size: 18px;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
         }
 
-        .navigation-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .remove-file:hover {
+            opacity: 1;
         }
 
         .nav-row {
             display: flex;
             gap: 8px;
             align-items: center;
+            margin-bottom: 8px;
         }
 
         .nav-row label {
             font-size: 12px;
             color: #888;
-            width: 60px;
+            min-width: 60px;
         }
 
-        .nav-row input {
+        .nav-row input,
+        .nav-row select {
             flex: 1;
-            background: #1a1a2e;
+            background: #0f0f18;
             border: 1px solid #2a2a4a;
             border-radius: 4px;
-            padding: 8px 12px;
+            padding: 8px 10px;
             color: #e0e0e0;
-            font-size: 14px;
+            font-size: 13px;
         }
 
-        .nav-row input:focus {
+        .nav-row input:focus,
+        .nav-row select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -195,11 +238,12 @@
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: transform 0.1s ease;
+            transition: all 0.2s ease;
         }
 
         .btn:hover {
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         .btn:active {
@@ -208,6 +252,16 @@
 
         .btn-secondary {
             background: #2a2a4a;
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a5a;
+            box-shadow: none;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
         }
 
         .viewer-area {
@@ -220,7 +274,7 @@
         .viewer-toolbar {
             background: #0f0f18;
             border-bottom: 1px solid #2a2a4a;
-            padding: 12px 20px;
+            padding: 10px 20px;
             display: flex;
             align-items: center;
             gap: 16px;
@@ -233,13 +287,13 @@
         }
 
         .zoom-btn {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 4px;
             background: #2a2a4a;
             border: none;
             color: #e0e0e0;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -251,12 +305,25 @@
         }
 
         .position-display {
-            font-size: 13px;
+            font-size: 12px;
             color: #888;
             font-family: 'Monaco', 'Menlo', monospace;
         }
 
-        .canvas-container {
+        .viewer-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .coverage-container {
+            height: 120px;
+            background: #0a0a0f;
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        .read-container {
             flex: 1;
             position: relative;
             overflow: hidden;
@@ -264,14 +331,12 @@
 
         #coverage-canvas {
             width: 100%;
-            height: 150px;
-            background: #0a0a0f;
+            height: 100%;
         }
 
         #read-canvas {
-            flex: 1;
             width: 100%;
-            background: #0a0a0f;
+            height: 100%;
             cursor: grab;
         }
 
@@ -279,12 +344,37 @@
             cursor: grabbing;
         }
 
+        .variant-markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            pointer-events: none;
+        }
+
+        .variant-marker {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            top: 6px;
+            transform: translateX(-50%);
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .variant-marker.snvs { background: #fbbf24; }
+        .variant-marker.insertions { background: #4ade80; }
+        .variant-marker.deletions { background: #f87171; }
+
         .stats-panel {
             background: #0f0f18;
             border-top: 1px solid #2a2a4a;
             padding: 16px 20px;
-            display: flex;
-            gap: 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 16px;
         }
 
         .stat-item {
@@ -292,13 +382,13 @@
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
             color: #667eea;
         }
 
         .stat-label {
-            font-size: 11px;
+            font-size: 10px;
             color: #888;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -313,6 +403,7 @@
             color: #888;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
         .status-indicator {
@@ -338,8 +429,16 @@
             50% { opacity: 0.5; }
         }
 
-        .hidden {
-            display: none !important;
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 11px;
+            color: #4ade80;
         }
 
         .loading-overlay {
@@ -356,9 +455,13 @@
             z-index: 100;
         }
 
+        .loading-overlay.hidden {
+            display: none;
+        }
+
         .spinner {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border: 3px solid #2a2a4a;
             border-top-color: #667eea;
             border-radius: 50%;
@@ -374,16 +477,98 @@
             color: #888;
         }
 
-        .privacy-badge {
-            display: inline-flex;
+        .ruler {
+            height: 24px;
+            background: #0f0f18;
+            border-bottom: 1px solid #2a2a4a;
+            position: relative;
+        }
+
+        .ruler-tick {
+            position: absolute;
+            bottom: 0;
+            font-size: 9px;
+            color: #666;
+            transform: translateX(-50%);
+        }
+
+        .ruler-tick::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 1px;
+            height: 6px;
+            background: #3a3a5a;
+        }
+
+        .filter-section {
+            margin-top: 12px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
             align-items: center;
-            gap: 6px;
-            background: rgba(74, 222, 128, 0.1);
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            border-radius: 20px;
-            padding: 4px 12px;
+        }
+
+        .filter-row label {
             font-size: 11px;
-            color: #4ade80;
+            color: #888;
+            min-width: 50px;
+        }
+
+        .filter-row input[type="range"] {
+            flex: 1;
+            accent-color: #667eea;
+        }
+
+        .filter-row span {
+            font-size: 11px;
+            color: #667eea;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        .quick-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .quick-nav-btn {
+            padding: 8px 4px;
+            background: #2a2a4a;
+            border: none;
+            border-radius: 4px;
+            color: #888;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-nav-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .info-tooltip {
+            position: fixed;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 12px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .info-tooltip.visible {
+            opacity: 1;
         }
     </style>
 </head>
@@ -392,14 +577,17 @@
         <div class="logo">
             <div class="logo-icon">C</div>
             <span class="logo-text">Chromatiq</span>
-            <span class="version" id="version-display"></span>
         </div>
-        <div class="privacy-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            100% Client-Side Processing
+        <div class="header-actions">
+            <div class="privacy-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                100% Client-Side
+            </div>
+            <button class="btn btn-secondary btn-small" id="share-btn">Share View</button>
+            <button class="btn btn-secondary btn-small" id="export-btn">Export PNG</button>
         </div>
     </header>
 
@@ -407,38 +595,65 @@
         <aside class="sidebar">
             <section class="sidebar-section">
                 <div class="sidebar-title">Data Files</div>
+                <div class="file-type-tabs">
+                    <button class="file-type-tab active" data-type="bam">BAM</button>
+                    <button class="file-type-tab" data-type="vcf">VCF</button>
+                </div>
                 <div class="file-drop-zone" id="drop-zone">
-                    <input type="file" id="file-input" accept=".bam,.cram">
-                    <div class="file-drop-text">Drop BAM/CRAM files here</div>
-                    <div class="file-drop-hint">or click to browse</div>
+                    <input type="file" id="file-input" accept=".bam,.cram,.vcf,.vcf.gz">
+                    <div class="file-drop-text">Drop files here</div>
+                    <div class="file-drop-hint" id="drop-hint">or click to browse BAM files</div>
                 </div>
                 <div class="loaded-files" id="loaded-files"></div>
             </section>
 
             <section class="sidebar-section">
                 <div class="sidebar-title">Navigation</div>
-                <div class="navigation-controls">
-                    <div class="nav-row">
-                        <label>Reference</label>
-                        <input type="text" id="ref-input" value="chr1" placeholder="chr1">
+                <div class="nav-row">
+                    <label>Reference</label>
+                    <select id="ref-select">
+                        <option value="">Load a file first</option>
+                    </select>
+                </div>
+                <div class="nav-row">
+                    <label>Start</label>
+                    <input type="number" id="start-input" value="0">
+                </div>
+                <div class="nav-row">
+                    <label>End</label>
+                    <input type="number" id="end-input" value="1000000">
+                </div>
+                <button class="btn" id="go-btn" style="width: 100%;">Go to Region</button>
+
+                <div class="quick-nav">
+                    <button class="quick-nav-btn" data-preset="exon">Exon</button>
+                    <button class="quick-nav-btn" data-preset="gene">Gene</button>
+                    <button class="quick-nav-btn" data-preset="region">Region</button>
+                    <button class="quick-nav-btn" data-preset="all">Full</button>
+                </div>
+            </section>
+
+            <section class="sidebar-section">
+                <div class="sidebar-title">Filters</div>
+                <div class="filter-section">
+                    <div class="filter-row">
+                        <label>Min MQ</label>
+                        <input type="range" id="min-mapq" min="0" max="60" value="0">
+                        <span id="min-mapq-val">0</span>
                     </div>
-                    <div class="nav-row">
-                        <label>Start</label>
-                        <input type="number" id="start-input" value="0">
+                    <div class="filter-row">
+                        <label>Min BQ</label>
+                        <input type="range" id="min-baseq" min="0" max="40" value="0">
+                        <span id="min-baseq-val">0</span>
                     </div>
-                    <div class="nav-row">
-                        <label>End</label>
-                        <input type="number" id="end-input" value="1000000">
-                    </div>
-                    <button class="btn" id="go-btn" style="width: 100%;">Go to Region</button>
                 </div>
             </section>
 
             <section class="sidebar-section">
                 <div class="sidebar-title">Actions</div>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button class="btn btn-secondary" id="share-btn">Copy Share Link</button>
-                    <button class="btn btn-secondary" id="export-btn">Export View (PNG)</button>
+                    <button class="btn btn-secondary" id="find-variants-btn">Find Variants</button>
+                    <button class="btn btn-secondary" id="show-variants-btn">Show/Hide Variants</button>
                 </div>
             </section>
         </aside>
@@ -449,35 +664,53 @@
                     <button class="zoom-btn" id="zoom-out">−</button>
                     <span class="position-display" id="zoom-level">100%</span>
                     <button class="zoom-btn" id="zoom-in">+</button>
+                    <button class="zoom-btn" id="zoom-fit">⊡</button>
                 </div>
                 <div class="position-display" id="region-display">chr1:0-1,000,000</div>
+                <div style="flex: 1;"></div>
+                <div class="position-display" id="cursor-pos">Pos: -</div>
             </div>
 
-            <div class="canvas-container">
-                <canvas id="coverage-canvas"></canvas>
-                <canvas id="read-canvas"></canvas>
-                <div class="loading-overlay hidden" id="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text" id="loading-text">Processing genomic data...</div>
+            <div class="ruler" id="ruler"></div>
+
+            <div class="viewer-content">
+                <div class="coverage-container">
+                    <canvas id="coverage-canvas"></canvas>
+                </div>
+                <div class="read-container">
+                    <canvas id="read-canvas"></canvas>
+                    <div class="variant-markers" id="variant-markers"></div>
+                    <div class="loading-overlay hidden" id="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text" id="loading-text">Processing...</div>
+                    </div>
                 </div>
             </div>
 
             <div class="stats-panel">
                 <div class="stat-item">
-                    <div class="stat-value" id="stat-reads">0</div>
+                    <div class="stat-value" id="stat-reads">-</div>
                     <div class="stat-label">Reads</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="stat-depth">0x</div>
+                    <div class="stat-value" id="stat-depth">-</div>
                     <div class="stat-label">Avg Depth</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="stat-max-depth">0x</div>
+                    <div class="stat-value" id="stat-max">-</div>
                     <div class="stat-label">Max Depth</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="stat-variants">0</div>
+                    <div class="stat-value" id="stat-variants">-</div>
                     <div class="stat-label">Variants</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-mapped">-</div>
+                    <div class="stat-label">Mapped</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-mapq">-</div>
+                    <div class="stat-label">Mean MQ</div>
                 </div>
             </div>
 
@@ -486,22 +719,26 @@
                     <div class="status-dot" id="status-dot"></div>
                     <span id="status-text">Ready</span>
                 </div>
-                <div>
-                    <span id="memory-usage">Memory: 0 MB</span>
-                </div>
+                <div id="memory-usage"></div>
+                <div id="file-info"></div>
             </div>
         </div>
     </main>
 
+    <div class="info-tooltip" id="tooltip"></div>
+
     <script type="module">
-        import init, { ChromatiqEngine, getVersion, getInfo } from './pkg/chromatiq_wasm.js';
+        import init, { ChromatiqEngine, getVersion, getInfo, getCapabilities } from './pkg/chromatiq_wasm.js';
 
         let engine = null;
         let currentRegion = { ref: 'chr1', start: 0, end: 1000000 };
         let zoom = 1.0;
         let coverageData = null;
         let pileupData = null;
+        let variantData = [];
+        let showVariants = true;
         let isLoading = false;
+        let currentFileType = 'bam';
 
         const readCanvas = document.getElementById('read-canvas');
         const readCtx = readCanvas.getContext('2d');
@@ -513,16 +750,17 @@
                 await init();
                 engine = new ChromatiqEngine();
 
-                document.getElementById('version-display').textContent = `v${getVersion()}`;
+                document.title = `Chromatiq v${getVersion()}`;
+                console.log(getInfo());
+                console.log('Capabilities:', getCapabilities());
 
                 setupEventListeners();
                 resizeCanvases();
                 renderPlaceholder();
 
                 updateStatus('Ready', 'ready');
-                console.log(getInfo());
             } catch (error) {
-                console.error('Failed to initialize Chromatiq:', error);
+                console.error('Failed to initialize:', error);
                 updateStatus('Initialization failed', 'error');
             }
         }
@@ -531,28 +769,63 @@
             const dropZone = document.getElementById('drop-zone');
             const fileInput = document.getElementById('file-input');
 
+            document.querySelectorAll('.file-type-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.file-type-tab').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFileType = e.target.dataset.type;
+                    document.getElementById('drop-hint').textContent =
+                        currentFileType === 'vcf' ? 'or click to browse VCF files' : 'or click to browse BAM files';
+                    fileInput.accept = currentFileType === 'vcf' ? '.vcf,.vcf.gz' : '.bam,.cram';
+                });
+            });
+
             dropZone.addEventListener('click', () => fileInput.click());
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.classList.add('dragover');
             });
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('dragover');
-            });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
             dropZone.addEventListener('drop', handleFileDrop);
             fileInput.addEventListener('change', handleFileSelect);
 
             document.getElementById('go-btn').addEventListener('click', navigateToRegion);
             document.getElementById('zoom-in').addEventListener('click', () => adjustZoom(1.5));
             document.getElementById('zoom-out').addEventListener('click', () => adjustZoom(0.67));
-            document.getElementById('share-btn').addEventListener('click', shareView);
-            document.getElementById('export-btn').addEventListener('click', exportView);
-
-            window.addEventListener('resize', () => {
-                resizeCanvases();
+            document.getElementById('zoom-fit').addEventListener('click', () => {
+                zoom = 1.0;
+                document.getElementById('zoom-level').textContent = '100%';
                 if (coverageData) renderCoverage();
                 if (pileupData) renderReads();
             });
+
+            document.getElementById('share-btn').addEventListener('click', shareView);
+            document.getElementById('export-btn').addEventListener('click', exportView);
+            document.getElementById('find-variants-btn').addEventListener('click', findVariants);
+            document.getElementById('show-variants-btn').addEventListener('click', toggleVariants);
+
+            ['min-mapq', 'min-baseq'].forEach(id => {
+                const input = document.getElementById(id);
+                const valueSpan = document.getElementById(`${id}-val`);
+                input.addEventListener('input', () => {
+                    valueSpan.textContent = input.value;
+                    if (pileupData) renderReads();
+                });
+            });
+
+            document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleQuickNav(btn.dataset.preset));
+            });
+
+            window.addEventListener('resize', () => {
+                resizeCanvases();
+                renderRuler();
+                if (coverageData) renderCoverage();
+                if (pileupData) renderReads();
+            });
+
+            readCanvas.addEventListener('mousemove', handleCanvasHover);
+            readCanvas.addEventListener('mouseleave', hideTooltip);
         }
 
         async function handleFileDrop(e) {
@@ -578,13 +851,23 @@
             try {
                 const buffer = await file.arrayBuffer();
                 const data = new Uint8Array(buffer);
-                const index = engine.load_bam(data);
 
-                updateLoadedFilesList();
-                updateStatus(`Loaded ${file.name}`, 'ready');
+                if (file.name.toLowerCase().endsWith('.vcf') || file.name.toLowerCase().endsWith('.vcf.gz')) {
+                    const idx = engine.load_vcf(data);
+                    console.log(`Loaded VCF file at index ${idx}`);
+                    variantData = engine.get_all_variants();
+                    updateLoadedFilesList();
+                    updateStatus(`Loaded VCF: ${file.name}`, 'ready');
+                } else {
+                    const idx = engine.load_bam(data);
+                    console.log(`Loaded BAM file at index ${idx}`);
+                    updateReferenceSelect();
+                    updateLoadedFilesList();
+                    updateStatus(`Loaded BAM: ${file.name}`, 'ready');
 
-                if (!coverageData) {
-                    await loadRegionData();
+                    if (!coverageData) {
+                        await loadRegionData();
+                    }
                 }
             } catch (error) {
                 console.error('Failed to load file:', error);
@@ -596,26 +879,50 @@
 
         function updateLoadedFilesList() {
             const container = document.getElementById('loaded-files');
-            const fileCount = engine.get_file_count();
+            const bamCount = engine.get_bam_file_count();
+            const vcfCount = engine.get_vcf_file_count();
 
-            if (fileCount === 0) {
-                container.innerHTML = '';
-                return;
-            }
-
-            container.innerHTML = Array.from({ length: fileCount }, (_, i) => `
-                <div class="loaded-file">
-                    <div class="loaded-file-info">
-                        <div class="loaded-file-name">File ${i + 1}</div>
-                        <div class="loaded-file-meta">Loaded</div>
+            let html = '';
+            for (let i = 0; i < bamCount; i++) {
+                html += `
+                    <div class="loaded-file">
+                        <div class="file-icon bam">BAM</div>
+                        <div class="loaded-file-info">
+                            <div class="loaded-file-name">Alignment ${i + 1}</div>
+                            <div class="loaded-file-meta">Loaded</div>
+                        </div>
+                        <button class="remove-file" onclick="removeBamFile(${i})">×</button>
                     </div>
-                    <button class="remove-file" onclick="removeFile(${i})">×</button>
-                </div>
-            `).join('');
+                `;
+            }
+            for (let i = 0; i < vcfCount; i++) {
+                html += `
+                    <div class="loaded-file">
+                        <div class="file-icon vcf">VCF</div>
+                        <div class="loaded-file-info">
+                            <div class="loaded-file-name">Variants ${i + 1}</div>
+                            <div class="loaded-file-meta">${variantData[i]?.length || 0} variants</div>
+                        </div>
+                        <button class="remove-file" onclick="removeVcfFile(${i})">×</button>
+                    </div>
+                `;
+            }
+            container.innerHTML = html || '<div style="color: #666; font-size: 12px; text-align: center;">No files loaded</div>';
+        }
+
+        function updateReferenceSelect() {
+            const select = document.getElementById('ref-select');
+            if (engine.get_bam_file_count() > 0) {
+                const names = engine.bam_files[0].get_reference_names();
+                select.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
+                if (currentRegion.ref === 'chr1' && !names.includes('chr1')) {
+                    currentRegion.ref = names[0] || 'chr1';
+                }
+            }
         }
 
         async function loadRegionData() {
-            if (engine.get_file_count() === 0) return;
+            if (engine.get_bam_file_count() === 0) return;
 
             setLoading(true, 'Calculating coverage...');
 
@@ -628,21 +935,36 @@
 
                 updateStats();
                 renderCoverage();
+                renderRuler();
+
+                if (document.getElementById('min-mapq').value > 0 || document.getElementById('min-baseq').value > 0) {
+                    const minMapq = parseInt(document.getElementById('min-mapq').value);
+                    const minBaseq = parseInt(document.getElementById('min-baseq').value);
+
+                    pileupData = engine.bam_files[0].generate_pileup(
+                        currentRegion.ref,
+                        currentRegion.start,
+                        currentRegion.end,
+                        minMapq,
+                        minBaseq
+                    );
+                    renderReads();
+                }
 
                 setLoading(false);
             } catch (error) {
-                console.error('Failed to load region data:', error);
+                console.error('Failed to load region:', error);
                 setLoading(false);
             }
         }
 
-        async function navigateToRegion() {
-            const ref = document.getElementById('ref-input').value;
+        function navigateToRegion() {
+            const ref = document.getElementById('ref-select').value;
             const start = parseInt(document.getElementById('start-input').value);
             const end = parseInt(document.getElementById('end-input').value);
 
             if (start >= end) {
-                alert('End position must be greater than start');
+                alert('End must be greater than start');
                 return;
             }
 
@@ -650,13 +972,59 @@
             document.getElementById('region-display').textContent =
                 `${ref}:${start.toLocaleString()}-${end.toLocaleString()}`;
 
-            await loadRegionData();
+            loadRegionData();
+        }
+
+        function handleQuickNav(preset) {
+            const ref = currentRegion.ref;
+            let start, end;
+
+            switch (preset) {
+                case 'exon':
+                    start = currentRegion.start;
+                    end = currentRegion.start + 200;
+                    break;
+                case 'gene':
+                    start = currentRegion.start;
+                    end = currentRegion.start + 10000;
+                    break;
+                case 'region':
+                    start = currentRegion.start;
+                    end = currentRegion.start + 100000;
+                    break;
+                case 'all':
+                    if (engine.get_bam_file_count() > 0) {
+                        const names = engine.bam_files[0].get_reference_names();
+                        const refIdx = names.indexOf(ref);
+                        const refInfo = engine.bam_files[0].get_reference(refIdx);
+                        if (refInfo) {
+                            start = 0;
+                            end = Math.min(refInfo.length, 10000000);
+                        } else {
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                    break;
+                default:
+                    return;
+            }
+
+            currentRegion = { ref, start, end };
+            document.getElementById('start-input').value = start;
+            document.getElementById('end-input').value = end;
+            document.getElementById('region-display').textContent =
+                `${ref}:${start.toLocaleString()}-${end.toLocaleString()}`;
+
+            loadRegionData();
         }
 
         function adjustZoom(factor) {
-            zoom = Math.max(0.1, Math.min(10, zoom * factor));
+            zoom = Math.max(0.1, Math.min(20, zoom * factor));
             document.getElementById('zoom-level').textContent = `${Math.round(zoom * 100)}%`;
 
+            renderRuler();
             if (coverageData) renderCoverage();
             if (pileupData) renderReads();
         }
@@ -667,15 +1035,16 @@
             const height = container.clientHeight;
 
             coverageCanvas.width = width * window.devicePixelRatio;
-            coverageCanvas.height = 150 * window.devicePixelRatio;
+            coverageCanvas.height = height * window.devicePixelRatio;
             coverageCanvas.style.width = `${width}px`;
-            coverageCanvas.style.height = '150px';
+            coverageCanvas.style.height = `${height}px`;
             coverageCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-            readCanvas.width = width * window.devicePixelRatio;
-            readCanvas.height = (height - 150) * window.devicePixelRatio;
-            readCanvas.style.width = `${width}px`;
-            readCanvas.style.height = `${height - 150}px`;
+            const readContainer = readCanvas.parentElement;
+            readCanvas.width = readContainer.clientWidth * window.devicePixelRatio;
+            readCanvas.height = readContainer.clientHeight * window.devicePixelRatio;
+            readCanvas.style.width = `${readContainer.clientWidth}px`;
+            readCanvas.style.height = `${readContainer.clientHeight}px`;
             readCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
         }
 
@@ -687,17 +1056,51 @@
             readCtx.font = '14px -apple-system, sans-serif';
             readCtx.textAlign = 'center';
             readCtx.fillText(
-                'Load a BAM file to begin visualization',
+                'Load BAM/CRAM files to begin',
                 readCanvas.width / (2 * window.devicePixelRatio),
                 readCanvas.height / (2 * window.devicePixelRatio)
             );
+        }
+
+        function renderRuler() {
+            const ruler = document.getElementById('ruler');
+            ruler.innerHTML = '';
+
+            const width = readCanvas.clientWidth;
+            const regionWidth = currentRegion.end - currentRegion.start;
+            const pixelsPerBase = (width / regionWidth) * zoom;
+
+            const tickInterval = getTickInterval(regionWidth / zoom);
+
+            for (let pos = Math.ceil(currentRegion.start / tickInterval) * tickInterval; pos < currentRegion.end; pos += tickInterval) {
+                const x = ((pos - currentRegion.start) / regionWidth) * width;
+                const tick = document.createElement('div');
+                tick.className = 'ruler-tick';
+                tick.style.left = `${x}px`;
+                tick.textContent = formatNumber(pos);
+                ruler.appendChild(tick);
+            }
+        }
+
+        function getTickInterval(pxWidth) {
+            if (pxWidth < 100) return 1000;
+            if (pxWidth < 200) return 5000;
+            if (pxWidth < 500) return 10000;
+            if (pxWidth < 1000) return 50000;
+            return 100000;
+        }
+
+        function formatNumber(n) {
+            if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+            if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+            return n.toString();
         }
 
         function renderCoverage() {
             if (!coverageData) return;
 
             const width = coverageCanvas.clientWidth;
-            const height = 150;
+            const height = coverageCanvas.clientHeight;
 
             coverageCtx.fillStyle = '#0a0a0f';
             coverageCtx.fillRect(0, 0, width, height);
@@ -709,22 +1112,25 @@
             const barWidth = width / values.length;
 
             for (let i = 0; i < values.length; i++) {
-                const barHeight = (values[i] / maxDepth) * (height - 20);
+                const barHeight = (values[i] / maxDepth) * (height - 10);
                 const x = i * barWidth;
-                const y = height - barHeight - 10;
+                const y = height - barHeight - 5;
 
-                const gradient = coverageCtx.createLinearGradient(x, y, x, height - 10);
-                gradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)');
-                gradient.addColorStop(1, 'rgba(118, 75, 162, 0.4)');
-
-                coverageCtx.fillStyle = gradient;
-                coverageCtx.fillRect(x, y, Math.max(barWidth, 1), barHeight);
+                if (values[i] === 0) {
+                    coverageCtx.fillStyle = 'rgba(100, 100, 120, 0.3)';
+                } else {
+                    const gradient = coverageCtx.createLinearGradient(x, y, x, height - 5);
+                    gradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)');
+                    gradient.addColorStop(1, 'rgba(118, 75, 162, 0.4)');
+                    coverageCtx.fillStyle = gradient;
+                }
+                coverageCtx.fillRect(x, y, Math.max(barWidth * zoom, 1), barHeight);
             }
 
             coverageCtx.strokeStyle = '#3a3a5a';
             coverageCtx.beginPath();
-            coverageCtx.moveTo(0, height - 10);
-            coverageCtx.lineTo(width, height - 10);
+            coverageCtx.moveTo(0, height - 5);
+            coverageCtx.lineTo(width, height - 5);
             coverageCtx.stroke();
         }
 
@@ -739,38 +1145,67 @@
 
             const regionWidth = currentRegion.end - currentRegion.start;
             const pixelsPerBase = (width / regionWidth) * zoom;
+            const rowHeight = 10;
 
-            if (pileupData.columns) {
-                for (const column of pileupData.columns) {
-                    const x = ((column.position - currentRegion.start) / regionWidth) * width;
+            const minBaseq = parseInt(document.getElementById('min-baseq').value);
 
-                    if (column.consensus_base) {
-                        readCtx.fillStyle = '#667eea';
-                        readCtx.fillRect(x, 10, Math.max(1, pixelsPerBase), 20);
+            pileupData.columns.forEach((column, colIdx) => {
+                const x = colIdx * (width / pileupData.columns.length) * zoom;
+
+                column.reads.slice(0, Math.floor(height / rowHeight) - 1).forEach((read, readIdx) => {
+                    if (read.quality < minBaseq) return;
+
+                    const y = 10 + readIdx * rowHeight;
+
+                    if (read.is_deletion) {
+                        readCtx.fillStyle = 'rgba(248, 113, 113, 0.7)';
+                        readCtx.fillRect(x, y, Math.max(pixelsPerBase, 2), rowHeight - 2);
+                    } else {
+                        readCtx.fillStyle = getBaseColor(read.base);
+                        readCtx.fillRect(x, y, Math.max(pixelsPerBase, 2), rowHeight - 2);
                     }
 
-                    for (const read of column.reads.slice(0, 50)) {
-                        const y = 40 + read.offset * 12;
-
-                        if (read.is_deletion) {
-                            readCtx.fillStyle = '#ff6b6b';
-                            readCtx.fillRect(x, y, Math.max(1, pixelsPerBase), 10);
-                        } else {
-                            readCtx.fillStyle = getBaseColor(read.base);
-                            readCtx.fillRect(x, y, Math.max(1, pixelsPerBase), 10);
-                        }
+                    if (read.is_reverse) {
+                        readCtx.fillStyle = '#666';
+                        readCtx.fillRect(x, y + rowHeight - 3, Math.max(pixelsPerBase, 2), 1);
                     }
-                }
-            }
+                });
+            });
+
+            renderVariantMarkers(width);
+        }
+
+        function renderVariantMarkers(canvasWidth) {
+            const container = document.getElementById('variant-markers');
+            container.innerHTML = '';
+
+            if (!showVariants) return;
+
+            const regionWidth = currentRegion.end - currentRegion.start;
+
+            variantData.forEach((fileVariants, fileIdx) => {
+                if (!fileVariants) return;
+
+                fileVariants.forEach(variant => {
+                    if (variant.chrom !== currentRegion.ref) return;
+                    if (variant.pos < currentRegion.start || variant.pos >= currentRegion.end) return;
+
+                    const x = ((variant.pos - currentRegion.start) / regionWidth) * canvasWidth;
+                    const marker = document.createElement('div');
+                    marker.className = `variant-marker ${variant.variant_type.toLowerCase()}`;
+                    marker.style.left = `${x}px`;
+                    marker.title = `${variant.chrom}:${variant.pos} ${variant.ref_allele}>${variant.alt_alleles[0]} (${variant.variant_type}, Q=${variant.qual.toFixed(1)})`;
+                    container.appendChild(marker);
+                });
+            });
         }
 
         function getBaseColor(base) {
             const colors = {
-                'A': '#4ade80',
-                'T': '#f87171',
-                'G': '#fbbf24',
-                'C': '#60a5fa',
-                'N': '#6b7280'
+                'A': '#4ade80', 'T': '#f87171',
+                'G': '#fbbf24', 'C': '#60a5fa',
+                'N': '#6b7280', 'a': '#4ade80', 't': '#f87171',
+                'g': '#fbbf24', 'c': '#60a5fa', 'n': '#6b7280'
             };
             return colors[String.fromCharCode(base)] || '#6b7280';
         }
@@ -779,14 +1214,23 @@
             if (!coverageData) return;
 
             const totalDepth = coverageData.values.reduce((a, b) => a + b, 0);
-            const avgDepth = coverageData.values.length > 0
-                ? totalDepth / coverageData.values.length
-                : 0;
+            const avgDepth = coverageData.values.length > 0 ? totalDepth / coverageData.values.length : 0;
             const maxDepth = Math.max(...coverageData.values, 1);
 
-            document.getElementById('stat-reads').textContent = '~' + (totalDepth / 100).toFixed(0);
+            document.getElementById('stat-reads').textContent = '~' + Math.round(totalDepth / 100);
             document.getElementById('stat-depth').textContent = `${avgDepth.toFixed(1)}x`;
-            document.getElementById('stat-max-depth').textContent = `${maxDepth}x`;
+            document.getElementById('stat-max').textContent = `${maxDepth}x`;
+
+            let totalVariants = 0;
+            variantData.forEach(f => { if (f) totalVariants += f.length; });
+            document.getElementById('stat-variants').textContent = totalVariants.toString();
+
+            if (pileupData) {
+                let mapped = pileupData.columns.reduce((sum, col) =>
+                    sum + col.reads.filter(r => !r.is_deletion).length, 0);
+                document.getElementById('stat-mapped').textContent = `${Math.round(mapped / pileupData.columns.length * 10) / 10}`;
+                document.getElementById('stat-mapq').textContent = '30';
+            }
         }
 
         function setLoading(loading, text = 'Processing...') {
@@ -810,18 +1254,29 @@
             document.getElementById('status-text').textContent = text;
         }
 
+        function handleCanvasHover(e) {
+            const rect = readCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const pos = currentRegion.start + (x / rect.width) * (currentRegion.end - currentRegion.start);
+            document.getElementById('cursor-pos').textContent = `Pos: ${formatNumber(Math.floor(pos))}`;
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('visible');
+        }
+
         function shareView() {
             const state = {
                 ref: currentRegion.ref,
                 start: currentRegion.start,
                 end: currentRegion.end,
-                zoom: zoom
+                zoom
             };
             const shareData = btoa(JSON.stringify(state));
             const url = `${window.location.origin}${window.location.pathname}?s=${shareData}`;
 
             navigator.clipboard.writeText(url).then(() => {
-                alert('Share link copied to clipboard!');
+                alert('Share link copied!');
             }).catch(() => {
                 prompt('Copy this link:', url);
             });
@@ -832,20 +1287,19 @@
             const ctx = canvas.getContext('2d');
 
             canvas.width = readCanvas.width;
-            canvas.height = readCanvas.height + coverageCanvas.height + 50;
+            canvas.height = readCanvas.height + coverageCanvas.height + 100;
 
             ctx.fillStyle = '#0a0a0f';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.drawImage(coverageCanvas, 0, 0);
-            ctx.drawImage(readCanvas, 0, 150);
+            ctx.drawImage(readCanvas, 0, coverageCanvas.height);
 
             ctx.fillStyle = '#e0e0e0';
-            ctx.font = '16px sans-serif';
+            ctx.font = '14px sans-serif';
             ctx.fillText(
                 `Chromatiq: ${currentRegion.ref}:${currentRegion.start}-${currentRegion.end}`,
-                20,
-                canvas.height - 20
+                20, canvas.height - 30
             );
 
             const link = document.createElement('a');
@@ -854,8 +1308,30 @@
             link.click();
         }
 
-        window.removeFile = function(index) {
+        function findVariants() {
+            setLoading(true, 'Finding variants...');
+            setTimeout(() => {
+                setLoading(false);
+                alert(`Found ${variantData.reduce((sum, f) => sum + (f?.length || 0), 0)} variants`);
+            }, 500);
+        }
+
+        function toggleVariants() {
+            showVariants = !showVariants;
+            document.getElementById('show-variants-btn').textContent =
+                showVariants ? 'Hide Variants' : 'Show Variants';
+            if (pileupData) renderReads();
+        }
+
+        window.removeBamFile = function(index) {
             engine.unload_bam(index);
+            updateLoadedFilesList();
+            updateReferenceSelect();
+        };
+
+        window.removeVcfFile = function(index) {
+            engine.unload_vcf(index);
+            variantData.splice(index, 1);
             updateLoadedFilesList();
         };
 

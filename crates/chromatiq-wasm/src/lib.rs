@@ -7,7 +7,6 @@
 #![cfg(target_arch = "wasm32")]
 
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -21,14 +20,18 @@ macro_rules! console_log {
 }
 
 use chromatiq_core::{
-    BamReader, BamRecord, CoreResult, Coverage, GenomicRegion, Pileup, PileupConfig,
-    ReferenceCollection,
+    bam::CigarOperation, bam::ReadFlags, BamReader, BamRecord, CoreResult, Coverage, GenomicRegion,
+    Pileup, PileupConfig, ReferenceCollection, RegionStats, VariantType, VcfReader, VcfRecord,
+    VcfStats,
 };
 
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = BamFile)]
     pub type BamFile;
+
+    #[wasm_bindgen(typescript_type = VcfFile)]
+    pub type VcfFile;
 }
 
 /// BAM file wrapper for WASM
@@ -38,6 +41,7 @@ pub struct BamFile {
     path: String,
     references: Vec<ReferenceInfo>,
     is_loaded: bool,
+    read_count: u64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -46,12 +50,45 @@ struct ReferenceInfo {
     length: u32,
 }
 
+/// VCF file wrapper for WASM
+#[wasm_bindgen]
+pub struct VcfFile {
+    reader: Option<VcfReader>,
+    variants: Vec<VariantData>,
+    stats: VcfStatsData,
+}
+
+#[derive(Serialize, Deserialize)]
+struct VariantData {
+    chrom: String,
+    pos: i32,
+    ref_allele: String,
+    alt_alleles: Vec<String>,
+    qual: f32,
+    filter: String,
+    variant_type: String,
+    allele_frequency: Option<f32>,
+    supporting_reads: Option<i32>,
+    is_passed: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+struct VcfStatsData {
+    total_variants: usize,
+    snvs: usize,
+    insertions: usize,
+    deletions: usize,
+    mnps: usize,
+    passed_variants: usize,
+    high_quality_variants: usize,
+    mean_quality: f32,
+}
+
 #[wasm_bindgen]
 impl BamFile {
-    /// Create a new BAM file from a byte array
     #[wasm_bindgen(constructor)]
     pub fn new(data: &[u8]) -> Result<BamFile, JsValue> {
-        console_log!("Loading BAM file from memory ({} bytes)", data.len());
+        console_log!("Loading BAM file ({} bytes)", data.len());
 
         let temp_dir = std::env::temp_dir();
         let temp_path = temp_dir.join(format!("chromatiq_{}.bam", rand::random::<u64>()));
@@ -62,15 +99,22 @@ impl BamFile {
         let reader = BamReader::new(&temp_path)
             .map_err(|e| JsValue::from_str(&format!("Failed to open BAM: {:?}", e)))?;
 
-        let references = reader
-            .reference_names()
+        let ref_names = reader.reference_names();
+        let mut read_count = 0u64;
+
+        for _ in reader.next_record() {
+            read_count += 1;
+        }
+
+        let references: Vec<ReferenceInfo> = ref_names
             .iter()
-            .map(|name| {
-                let ref_info = reader.get_reference(0).cloned();
-                ReferenceInfo {
-                    name: name.to_string(),
-                    length: reader.get_reference(0).map(|r| r.length).unwrap_or(0),
-                }
+            .enumerate()
+            .map(|(i, name)| ReferenceInfo {
+                name: name.to_string(),
+                length: reader
+                    .get_reference(i as i32)
+                    .map(|r| r.length)
+                    .unwrap_or(0),
             })
             .collect();
 
@@ -79,10 +123,10 @@ impl BamFile {
             path: temp_path.to_string_lossy().to_string(),
             references,
             is_loaded: true,
+            read_count,
         })
     }
 
-    /// Get list of reference sequences
     #[wasm_bindgen]
     pub fn get_references(&self) -> Result<JsValue, JsValue> {
         let refs: Vec<JsValue> = self
@@ -93,13 +137,11 @@ impl BamFile {
         Ok(JsValue::from(&refs))
     }
 
-    /// Get reference names as array
     #[wasm_bindgen]
     pub fn get_reference_names(&self) -> Vec<String> {
         self.references.iter().map(|r| r.name.clone()).collect()
     }
 
-    /// Calculate coverage for a region
     #[wasm_bindgen]
     pub fn calculate_coverage(
         &mut self,
@@ -129,7 +171,6 @@ impl BamFile {
         Ok(serialized)
     }
 
-    /// Generate pileup for a region
     #[wasm_bindgen]
     pub fn generate_pileup(
         &mut self,
@@ -165,19 +206,61 @@ impl BamFile {
         Ok(serialized)
     }
 
-    /// Get read count
     #[wasm_bindgen]
-    pub fn get_read_count(&mut self) -> Result<u64, JsValue> {
+    pub fn get_read_count(&self) -> u64 {
+        self.read_count
+    }
+
+    #[wasm_bindgen]
+    pub fn get_region_stats(
+        &mut self,
+        ref_name: &str,
+        start: i32,
+        end: i32,
+    ) -> Result<JsValue, JsValue> {
         let reader = self
             .reader
             .as_mut()
             .ok_or_else(|| JsValue::from_str("BAM file not loaded"))?;
 
-        let mut count = 0;
-        while let Some(Some(_)) = reader.next_record().map(|r| r.ok()) {
-            count += 1;
+        let ref_id = reader
+            .reference_names()
+            .iter()
+            .position(|n| n == &ref_name)
+            .ok_or_else(|| JsValue::from_str(&format!("Reference '{}' not found", ref_name)))?
+            as i32;
+
+        let mut records = Vec::new();
+        while let Some(record_result) = reader.next_record() {
+            let record = match record_result {
+                Ok(r) => r,
+                Err(_) => continue,
+            };
+            if record.ref_id != ref_id {
+                continue;
+            }
+            if record.pos >= end {
+                continue;
+            }
+            if record.end_pos() <= start {
+                continue;
+            }
+            records.push(record);
         }
-        Ok(count)
+
+        let stats = RegionStats::from_records(&records);
+
+        let stats_data = RegionStatsData {
+            read_count: stats.read_count,
+            mapped_count: stats.mapped_count,
+            properly_paired: stats.properly_paired,
+            duplicate_count: stats.duplicate_count,
+            mean_mapq: stats.mean_mapq,
+            mean_read_length: stats.mean_read_length,
+        };
+
+        serde_wasm_bindgen::to_value(&stats_data)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
     }
 }
 
@@ -187,6 +270,113 @@ impl Drop for BamFile {
             let _ = std::fs::remove_file(&self.path);
         }
     }
+}
+
+#[wasm_bindgen]
+impl VcfFile {
+    #[wasm_bindgen(constructor)]
+    pub fn new(data: &[u8]) -> Result<VcfFile, JsValue> {
+        console_log!("Loading VCF file ({} bytes)", data.len());
+
+        let content = String::from_utf8(data.to_vec())
+            .map_err(|e| JsValue::from_str(&format!("Invalid UTF-8: {:?}", e)))?;
+
+        let reader = VcfReader::new(&content);
+        let stats = VcfStats::from_reader(&reader);
+
+        let variants: Vec<VariantData> = reader
+            .records()
+            .iter()
+            .map(|r| VariantData {
+                chrom: r.chrom.clone(),
+                pos: r.pos,
+                ref_allele: r.ref_allele.clone(),
+                alt_alleles: r.alt_alleles.clone(),
+                qual: r.qual,
+                filter: r.filter.clone(),
+                variant_type: format!("{:?}", r.variant_type()),
+                allele_frequency: r.allele_frequency(),
+                supporting_reads: r.supporting_reads(),
+                is_passed: r.is_passed(),
+            })
+            .collect();
+
+        let stats_data = VcfStatsData {
+            total_variants: stats.total_variants,
+            snvs: stats.snvs,
+            insertions: stats.insertions,
+            deletions: stats.deletions,
+            mnps: stats.mnps,
+            passed_variants: stats.passed_variants,
+            high_quality_variants: stats.high_quality_variants,
+            mean_quality: stats.mean_quality,
+        };
+
+        Ok(Self {
+            reader: Some(reader),
+            variants,
+            stats: stats_data,
+        })
+    }
+
+    #[wasm_bindgen]
+    pub fn get_variants(&self) -> Result<JsValue, JsValue> {
+        serde_wasm_bindgen::to_value(&self.variants)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
+    }
+
+    #[wasm_bindgen]
+    pub fn get_stats(&self) -> Result<JsValue, JsValue> {
+        serde_wasm_bindgen::to_value(&self.stats)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
+    }
+
+    #[wasm_bindgen]
+    pub fn get_variants_in_region(
+        &self,
+        chrom: &str,
+        start: i32,
+        end: i32,
+    ) -> Result<JsValue, JsValue> {
+        let filtered: Vec<&VariantData> = self
+            .variants
+            .iter()
+            .filter(|v| v.chrom == chrom && v.pos >= start && v.pos < end)
+            .collect();
+
+        serde_wasm_bindgen::to_value(&filtered)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
+    }
+
+    #[wasm_bindgen]
+    pub fn get_passed_variants(&self) -> Result<JsValue, JsValue> {
+        let passed: Vec<&VariantData> = self.variants.iter().filter(|v| v.is_passed).collect();
+
+        serde_wasm_bindgen::to_value(&passed)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
+    }
+
+    #[wasm_bindgen]
+    pub fn get_high_quality_variants(&self, min_qual: f32) -> Result<JsValue, JsValue> {
+        let hq: Vec<&VariantData> = self
+            .variants
+            .iter()
+            .filter(|v| v.qual >= min_qual)
+            .collect();
+
+        serde_wasm_bindgen::to_value(&hq)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct RegionStatsData {
+    read_count: usize,
+    mapped_count: usize,
+    properly_paired: usize,
+    duplicate_count: usize,
+    mean_mapq: f32,
+    mean_read_length: f32,
 }
 
 /// Coverage data for JavaScript
@@ -289,20 +479,20 @@ impl From<Pileup> for PileupData {
 #[wasm_bindgen]
 pub struct ChromatiqEngine {
     bam_files: Vec<BamFile>,
+    vcf_files: Vec<VcfFile>,
 }
 
 #[wasm_bindgen]
 impl ChromatiqEngine {
-    /// Create a new Chromatiq engine
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         console_log!("Chromatiq Engine initialized");
         Self {
             bam_files: Vec::new(),
+            vcf_files: Vec::new(),
         }
     }
 
-    /// Load a BAM file from byte array
     #[wasm_bindgen]
     pub fn load_bam(&mut self, data: &[u8]) -> Result<usize, JsValue> {
         let bam_file = BamFile::new(data)?;
@@ -311,7 +501,14 @@ impl ChromatiqEngine {
         Ok(idx)
     }
 
-    /// Unload a BAM file
+    #[wasm_bindgen]
+    pub fn load_vcf(&mut self, data: &[u8]) -> Result<usize, JsValue> {
+        let vcf_file = VcfFile::new(data)?;
+        let idx = self.vcf_files.len();
+        self.vcf_files.push(vcf_file);
+        Ok(idx)
+    }
+
     #[wasm_bindgen]
     pub fn unload_bam(&mut self, index: usize) -> Result<(), JsValue> {
         if index >= self.bam_files.len() {
@@ -321,13 +518,25 @@ impl ChromatiqEngine {
         Ok(())
     }
 
-    /// Get number of loaded BAM files
     #[wasm_bindgen]
-    pub fn get_file_count(&self) -> usize {
+    pub fn unload_vcf(&mut self, index: usize) -> Result<(), JsValue> {
+        if index >= self.vcf_files.len() {
+            return Err(JsValue::from_str("Invalid VCF file index"));
+        }
+        self.vcf_files.remove(index);
+        Ok(())
+    }
+
+    #[wasm_bindgen]
+    pub fn get_bam_file_count(&self) -> usize {
         self.bam_files.len()
     }
 
-    /// Calculate coverage for a region across all loaded files
+    #[wasm_bindgen]
+    pub fn get_vcf_file_count(&self) -> usize {
+        self.vcf_files.len()
+    }
+
     #[wasm_bindgen]
     pub fn calculate_combined_coverage(
         &mut self,
@@ -360,6 +569,25 @@ impl ChromatiqEngine {
         serde_wasm_bindgen::to_value(&combined)
             .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
     }
+
+    #[wasm_bindgen]
+    pub fn get_all_variants(&self) -> Result<JsValue, JsValue> {
+        let all_variants: Vec<JsValue> = self
+            .vcf_files
+            .iter()
+            .enumerate()
+            .map(|(file_idx, vcf)| {
+                let mut file_variants = vcf.variants.clone();
+                for v in &mut file_variants {
+                    v.chrom = format!("[{}] {}", file_idx, v.chrom);
+                }
+                serde_wasm_bindgen::to_value(&file_variants).unwrap_or(JsValue::NULL)
+            })
+            .collect();
+
+        serde_wasm_bindgen::to_value(&all_variants)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {:?}", e)))
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -370,23 +598,43 @@ struct CombinedCoverageData {
     values: Vec<u32>,
 }
 
-/// Initialize panic hook for better error messages
 #[wasm_bindgen(start)]
 pub fn init() {
     console_error_panic_hook::set_once();
 }
 
-/// Get version information
 #[wasm_bindgen]
 pub fn get_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
 
-/// Get engine information
 #[wasm_bindgen]
 pub fn get_info() -> String {
     format!(
-        "Chromatiq {} - WASM Genomic Visualization Engine",
+        "Chromatiq {} - WASM Genomic Visualization Engine with VCF support",
         env!("CARGO_PKG_VERSION")
     )
+}
+
+#[wasm_bindgen]
+pub fn get_capabilities() -> String {
+    serde_json::to_string(&Capabilities {
+        bam_support: true,
+        vcf_support: true,
+        cram_support: false,
+        indexed_bam: false,
+        multi_track: true,
+        offline_mode: true,
+    })
+    .unwrap_or_default()
+}
+
+#[derive(Serialize)]
+struct Capabilities {
+    bam_support: bool,
+    vcf_support: bool,
+    cram_support: bool,
+    indexed_bam: bool,
+    multi_track: bool,
+    offline_mode: bool,
 }
