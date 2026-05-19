@@ -4,6 +4,12 @@
 
 Chromatiq is a high-performance genome browser that runs entirely in the web browser using WebAssembly. It processes genomic data client-side, eliminating cloud infrastructure costs and ensuring complete data privacy.
 
+## Demo
+
+![Build output](screenshots/demo.png)
+
+> Note: `cargo test` has compilation errors in test modules (missing imports for `CigarOp`, `ReadFlags`, `CigarOperation`). The library itself builds successfully in release mode.
+
 ## Features
 
 - **100% Client-Side Processing**: Genomic data never leaves the user's computer
