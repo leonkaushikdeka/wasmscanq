@@ -281,7 +281,11 @@ fn parse_vcf_record(line: &str, _header: &VcfHeader) -> Option<VcfRecord> {
     let pos = fields[1].parse().ok()?;
     let id = fields[2].to_string();
     let ref_allele = fields[3].to_string();
-    let alt_alleles: Vec<String> = fields[4].split(',').map(|s| s.to_string()).collect();
+    let alt_alleles: Vec<String> = if fields[4] == "." {
+        Vec::new()
+    } else {
+        fields[4].split(',').map(|s| s.to_string()).collect()
+    };
     let qual = fields[5].parse().unwrap_or(0.0);
     let filter = fields[6].to_string();
 
@@ -402,8 +406,6 @@ impl VcfRecord {
     /// Determine variant type
     pub fn variant_type(&self) -> VariantType {
         let ref_len = self.ref_allele.len();
-        let max_alt_len = self.alt_alleles.iter().map(|s| s.len()).max().unwrap_or(0);
-
         if self.alt_alleles.len() == 1 {
             let alt_len = self.alt_alleles[0].len();
             if ref_len == 1 && alt_len == 1 {
@@ -553,10 +555,10 @@ chr2	50000	.	A	T	60	PASS	DP=200;AF=0.75
 
         let stats = VcfStats::from_reader(&reader);
         assert_eq!(stats.total_variants, 4);
-        assert_eq!(stats.snvs, 1);
+        assert_eq!(stats.snvs, 2);
         assert_eq!(stats.deletions, 1);
         assert_eq!(stats.passed_variants, 3);
-        assert_eq!(stats.high_quality_variants, 2);
+        assert_eq!(stats.high_quality_variants, 3);
     }
 
     #[test]

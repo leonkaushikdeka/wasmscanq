@@ -287,7 +287,7 @@ impl HighResCoverage {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bam::{CigarOperation, ReadFlags};
+    use crate::bam::{CigarOp, CigarOperation, ReadFlags};
 
     #[test]
     fn test_coverage_calculator_empty() {
@@ -300,7 +300,7 @@ mod tests {
 
     #[test]
     fn test_coverage_calculator_single_read() {
-        let calc = CoverageCalculator::new(0, 100);
+        let mut calc = CoverageCalculator::new(0, 100);
 
         let read = BamRecord {
             ref_id: 0,

@@ -481,7 +481,7 @@ pub fn find_variants(pileup: &Pileup) -> Vec<VariantCandidate> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bam::ReadFlags;
+    use crate::bam::{CigarOperation, ReadFlags};
 
     fn create_test_read(pos: i32, cigar_len: u32) -> BamRecord {
         BamRecord {
@@ -516,7 +516,8 @@ mod tests {
         assert!(column_10.is_some());
         assert_eq!(column_10.unwrap().position, 10);
 
-        let column_15 = gen.next_column();
+        let column_15 =
+            core::iter::from_fn(|| gen.next_column()).find(|column| column.position == 15);
         assert!(column_15.is_some());
         assert_eq!(column_15.unwrap().depth, 2);
     }

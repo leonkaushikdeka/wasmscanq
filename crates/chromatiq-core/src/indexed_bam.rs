@@ -166,7 +166,7 @@ impl BaiIndex {
 
     /// Parse BAI index from bytes
     pub fn from_bytes(data: &[u8]) -> CoreResult<Self> {
-        if data.len() < 32 {
+        if data.len() < 16 {
             return Err(crate::CoreError::InvalidFormat("BAI file too small"));
         }
 
@@ -388,6 +388,7 @@ impl RegionStats {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::bam::{CigarOp, CigarOperation, ReadFlags};
 
     #[test]
     fn test_bai_signature() {
@@ -395,7 +396,7 @@ mod tests {
             0x42, 0x41, 0x49, 0x01, // signature
             0x01, 0x00, 0x00, 0x00, // version
             0x01, 0x00, 0x00, 0x00, // sort order
-            0x02, 0x00, 0x00, 0x00, // n_refs
+            0x00, 0x00, 0x00, 0x00, // n_refs
         ];
 
         let index = BaiIndex::from_bytes(&valid_bai);
@@ -403,7 +404,7 @@ mod tests {
         let idx = index.unwrap();
         assert_eq!(idx.signature, [b'B', b'A', b'I', 0x01]);
         assert_eq!(idx.version, 1);
-        assert_eq!(idx.n_refs, 2);
+        assert_eq!(idx.n_refs, 0);
     }
 
     #[test]

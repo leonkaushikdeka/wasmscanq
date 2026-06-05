@@ -110,6 +110,7 @@ impl ReferenceCollection {
         let idx = self.references.len();
         self.references.push(ref_seq.clone());
 
+        self.name_index.push((ref_seq.accession.clone(), idx));
         self.name_index.push((ref_seq.name.clone(), idx));
 
         for alias in &ref_seq.aliases {
